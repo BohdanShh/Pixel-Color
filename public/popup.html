@@ -13,52 +13,62 @@
     />
   </head>
   <body>
-    <div class="header">
-      <div class="header__logo">
-        <img
-          src="images/icon-32x32.png"
-          alt="Logo"
-        />
-        <h1 class="header__title">Pixel Color</h1>
-      </div>
-      <button id="pick-color-btn">
-        <img
-          src="images//pipette.png"
-          alt="Pipette"
-          width="15"
-          height="15"
-        />
-      </button>
-    </div>
-    <div class="content">
-      <div class="content__color-picker">
-        <h3>Selected color</h3>
-        <div class="content__picker-wrapper">
-          <canvas id="color-picker"></canvas>
-          <canvas id="color-hue-bar"></canvas>
+    <div class="wrapper">
+      <div class="header">
+        <div class="header__logo">
+          <img
+            src="images/icon-32x32.png"
+            alt="Logo"
+          />
+          <h1 class="header__title">Pixel Color</h1>
         </div>
-        <div class="content__color-picker-value">
-          <select id="color-type-select">
-            <option value="hex">HEX</option>
-            <option value="rgb">RGB</option>
-          </select>
-          <div class="content__value-wrapper">
-            <div class="content__display-value">#da3e39</div>
-            <button id="copy-value-btn">
-              <img
-                src="images/copy.svg"
-                alt="Copy"
-              />
-            </button>
+        <button id="pick-color-btn">
+          <img
+            src="images//pipette.png"
+            alt="Pipette"
+            width="15"
+            height="15"
+          />
+        </button>
+      </div>
+      <div class="content">
+        <div class="content__color-picker">
+          <h3>Selected color</h3>
+          <div class="content__picker-wrapper">
+            <canvas
+              id="color-picker"
+              width="330"
+              height="200"
+            ></canvas>
+            <canvas
+              id="color-hue-bar"
+              width="30"
+              height="200"
+            ></canvas>
+          </div>
+          <div class="content__color-picker-value">
+            <select id="color-type-select">
+              <option value="hex">HEX</option>
+              <option value="rgb">RGB</option>
+            </select>
+            <div class="content__value-wrapper">
+              <div class="content__display-value">#000000</div>
+              <button id="copy-value-btn">
+                <img
+                  src="images/copy.svg"
+                  alt="Copy"
+                />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="recent">
-        <h3>Recent</h3>
-        <div class="recent__btns">
-          <button id="recent__color-btn"></button>
-          <button id="recent__color-btn"></button>
-          <button id="recent__color-btn"></button>
+        <div class="recent">
+          <h3>Recent</h3>
+          <div class="recent__btns">
+            <button id="recent__color-btn"></button>
+            <button id="recent__color-btn"></button>
+            <button id="recent__color-btn"></button>
+          </div>
         </div>
       </div>
     </div>

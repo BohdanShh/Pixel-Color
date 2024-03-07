@@ -1,48 +1,182 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { hexToRgb } from '../utils/hexToRgb';
+import { rgbToHex } from '../utils/rgbToHex';
 
-const colorPickerState = {
-  drag: false,
-  rgbaColor: 'rgba(255,0,0,1)',
+const hueBarState = {
+  x: 0,
+  y: 0,
 };
 
-const colorBlock: any = document.getElementById('color-picker');
-const ctx_colorBlock = colorBlock.getContext('2d');
-const colorBlockWidth = colorBlock.width;
-const colorBlockHeight = colorBlock.height;
+const colorPickerState = {
+  x: 0,
+  y: 0,
+  isDragging: false,
+  rgbColor: 'rgb(255, 0, 0)',
+  colorType: 'hex',
+};
 
-const hueBar: any = document.getElementById('color-hue-bar');
-const ctx_hueBar = hueBar.getContext('2d');
+const colorTypeSelect = document.querySelector<HTMLSelectElement>('#color-type-select');
+const displayColorValue = document.querySelector<HTMLDivElement>('.content__display-value');
+const copyValueBtn = document.querySelector<HTMLButtonElement>('#copy-value-btn');
+
+const colorPicker = document.querySelector<HTMLCanvasElement>('#color-picker');
+const colorPickerCtx = colorPicker.getContext('2d');
+const colorPickerWidth = colorPicker.width;
+const colorPickerHeight = colorPicker.height;
+
+const hueBar = document.querySelector<HTMLCanvasElement>('#color-hue-bar');
+const hueBarCtx = hueBar.getContext('2d');
 const hueBarWidth = hueBar.width;
 const hueBarHeight = hueBar.height;
 
-ctx_colorBlock.rect(0, 0, colorBlockWidth, colorBlockHeight);
-fillColorBlockGradient();
+colorPickerCtx.rect(0, 0, colorPickerWidth, colorPickerHeight);
+setColorPickerGradient();
 
-ctx_hueBar.rect(0, 0, hueBarWidth, hueBarHeight);
-const grd1 = ctx_hueBar.createLinearGradient(0, 0, 0, colorBlockHeight);
-grd1.addColorStop(0, 'rgba(255, 0, 0, 1)');
-grd1.addColorStop(0.17, 'rgba(255, 255, 0, 1)');
-grd1.addColorStop(0.34, 'rgba(0, 255, 0, 1)');
-grd1.addColorStop(0.51, 'rgba(0, 255, 255, 1)');
-grd1.addColorStop(0.68, 'rgba(0, 0, 255, 1)');
-grd1.addColorStop(0.85, 'rgba(255, 0, 255, 1)');
-grd1.addColorStop(1, 'rgba(255, 0, 0, 1)');
-ctx_hueBar.fillStyle = grd1;
-ctx_hueBar.fill();
+hueBarCtx.rect(0, 0, hueBarWidth, hueBarHeight);
 
-function fillColorBlockGradient() {
-  ctx_colorBlock.fillStyle = colorPickerState.rgbaColor;
-  ctx_colorBlock.fillRect(0, 0, colorBlockWidth, colorBlockHeight);
+const grd1 = hueBarCtx.createLinearGradient(0, 0, 0, colorPickerHeight);
+grd1.addColorStop(0, 'rgb(255, 0, 0)');
+grd1.addColorStop(0.17, 'rgb(255, 255, 0)');
+grd1.addColorStop(0.34, 'rgb(0, 255, 0)');
+grd1.addColorStop(0.51, 'rgb(0, 255, 255)');
+grd1.addColorStop(0.68, 'rgb(0, 0, 255)');
+grd1.addColorStop(0.85, 'rgb(255, 0, 255)');
+grd1.addColorStop(1, 'rgb(255, 0, 0)');
 
-  const grdWhite = ctx_hueBar.createLinearGradient(0, 0, colorBlockWidth, 0);
-  grdWhite.addColorStop(0, 'rgba(255,255,255,1)');
-  grdWhite.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx_colorBlock.fillStyle = grdWhite;
-  ctx_colorBlock.fillRect(0, 0, colorBlockWidth, colorBlockHeight);
+hueBarCtx.fillStyle = grd1;
+hueBarCtx.fill();
 
-  const grdBlack = ctx_hueBar.createLinearGradient(0, 0, 0, colorBlockHeight);
-  grdBlack.addColorStop(0, 'rgba(0,0,0,0)');
-  grdBlack.addColorStop(1, 'rgba(0,0,0,1)');
-  ctx_colorBlock.fillStyle = grdBlack;
-  ctx_colorBlock.fillRect(0, 0, colorBlockWidth, colorBlockHeight);
+function hueBarClickHandler(event: MouseEvent) {
+  hueBarState.x = event.offsetX;
+  hueBarState.y = event.offsetY;
+
+  const [r, g, b] = hueBarCtx.getImageData(hueBarState.x, hueBarState.y, 1, 1).data;
+  colorPickerState.rgbColor = 'rgb(' + r + ',' + g + ',' + b + ')';
+
+  setColorPickerGradient();
+  setColor(event);
 }
+
+// Functions for color picker functionality
+
+function setColorPickerGradient() {
+  colorPickerCtx.fillStyle = colorPickerState.rgbColor;
+  colorPickerCtx.fillRect(0, 0, colorPickerWidth, colorPickerHeight);
+
+  const grdWhite = hueBarCtx.createLinearGradient(0, 0, colorPickerWidth, 0);
+  grdWhite.addColorStop(0, 'rgba(255, 255, 255, 1)');
+  grdWhite.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+  colorPickerCtx.fillStyle = grdWhite;
+  colorPickerCtx.fillRect(0, 0, colorPickerWidth, colorPickerHeight);
+
+  const grdBlack = hueBarCtx.createLinearGradient(0, 0, 0, colorPickerHeight);
+  grdBlack.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  grdBlack.addColorStop(1, 'rgba(0, 0, 0, 1)');
+
+  colorPickerCtx.fillStyle = grdBlack;
+  colorPickerCtx.fillRect(0, 0, colorPickerWidth, colorPickerHeight);
+}
+
+function setColor(event: MouseEvent) {
+  colorPickerState.x = event.offsetX;
+  colorPickerState.y = event.offsetY;
+
+  const [r, g, b] = colorPickerCtx.getImageData(colorPickerState.x, colorPickerState.y, 1, 1).data;
+
+  colorPickerState.rgbColor = 'rgb(' + r + ',' + g + ',' + b + ')';
+
+  const hex = rgbToHex(r, g, b);
+
+  displayColorValue.textContent =
+    colorPickerState.colorType === 'hex' ? hex : `RGB(${r}, ${g}, ${b})`;
+}
+
+// Event handlers for color picker
+
+function colorPickerMouseDownHandler(event: MouseEvent) {
+  event.preventDefault();
+
+  colorPickerState.isDragging = true;
+
+  setColor(event);
+}
+
+function colorPickerMouseMoveHandler(event: MouseEvent) {
+  if (colorPickerState.isDragging) {
+    setColor(event);
+  }
+}
+
+function colorPickerMouseOutHandler() {
+  colorPickerState.isDragging = false;
+}
+
+function colorPickerMouseUpHandler() {
+  colorPickerState.isDragging = false;
+}
+
+// Event handlers for hue bar
+
+function hueBarMouseDownHandler(event: MouseEvent) {
+  event.preventDefault();
+
+  colorPickerState.isDragging = true;
+
+  hueBarClickHandler(event);
+}
+
+function hueBarMouseMoveHandler(event: MouseEvent) {
+  if (colorPickerState.isDragging) {
+    hueBarClickHandler(event);
+  }
+}
+
+function hueBarMouseOutHandler() {
+  colorPickerState.isDragging = false;
+}
+
+function hueBarMouseUpHandler() {
+  colorPickerState.isDragging = false;
+}
+
+// Event handlers for color type select
+
+function colorTypeSelectValueChangeHandler(event: Event) {
+  const { value } = event.target as HTMLSelectElement;
+  colorPickerState.colorType = value;
+
+  if (value === 'hex') {
+    const rgbRegex = /(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/;
+    const [r, g, b] = displayColorValue.textContent.match(rgbRegex);
+
+    displayColorValue.textContent = rgbToHex(Number(r), Number(g), Number(b));
+
+    return;
+  }
+
+  const { r, g, b } = hexToRgb(displayColorValue.textContent);
+
+  displayColorValue.textContent = `RGB(${r}, ${g}, ${b})`;
+}
+
+// Event handlers for copy value button
+
+function copyValueButtonClickHandler() {
+  navigator.clipboard.writeText(displayColorValue.textContent);
+}
+
+// Events
+
+colorPicker.addEventListener('mousedown', colorPickerMouseDownHandler, false);
+colorPicker.addEventListener('mousemove', colorPickerMouseMoveHandler, false);
+colorPicker.addEventListener('mouseout', colorPickerMouseOutHandler, false);
+colorPicker.addEventListener('mouseup', colorPickerMouseUpHandler, true);
+
+hueBar.addEventListener('mousedown', hueBarMouseDownHandler, false);
+hueBar.addEventListener('mousemove', hueBarMouseMoveHandler, false);
+hueBar.addEventListener('mouseout', hueBarMouseOutHandler, false);
+hueBar.addEventListener('mouseup', hueBarMouseUpHandler, false);
+
+colorTypeSelect.addEventListener('change', colorTypeSelectValueChangeHandler);
+
+copyValueBtn.addEventListener('click', copyValueButtonClickHandler);

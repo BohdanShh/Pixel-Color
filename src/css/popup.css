@@ -27,6 +27,12 @@ canvas:hover {
   cursor: crosshair;
 }
 
+.wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Header styles */
 
 .header {
@@ -64,6 +70,7 @@ canvas:hover {
 /* Content styles */
 
 .content {
+  flex: 1;
   padding: 15px;
   display: flex;
   flex-direction: column;
@@ -82,14 +89,10 @@ canvas:hover {
 }
 
 #color-picker {
-  flex: 1;
-  width: 100px;
-  height: 200px;
   border-radius: 5px;
 }
 
 #color-hue-bar {
-  width: 30px;
   border-radius: 5px;
 }
 
@@ -142,8 +145,8 @@ canvas:hover {
 }
 
 #recent__color-btn {
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
   border-radius: 5px;
   background-color: #5f9ea0;
 }
