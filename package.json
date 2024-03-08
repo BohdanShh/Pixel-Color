@@ -15,7 +15,6 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "get-canvas-pixel-color": "^2.0.1",
     "html2canvas": "^1.4.1"
   },
   "devDependencies": {

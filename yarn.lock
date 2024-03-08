@@ -1688,11 +1688,6 @@ function-bind@^1.1.2:
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.2.tgz#2c02d864d97f3ea6c8830c464cbd11ab6eab7a1c"
   integrity sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==
 
-get-canvas-pixel-color@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/get-canvas-pixel-color/-/get-canvas-pixel-color-2.0.1.tgz#e7553dd3cf52dac4b72b6544bbb251126b667be9"
-  integrity sha512-IpriFwZbdLBcaB+z4PKLhCruvYwVBv5hpEkFY4NSlKGQQAAaZmeWBHTT2eem3GHbOXQcgCNevJw9zQOsGb4+uA==
-
 get-east-asian-width@^1.0.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/get-east-asian-width/-/get-east-asian-width-1.2.0.tgz#5e6ebd9baee6fb8b7b6bd505221065f0cd91f64e"
