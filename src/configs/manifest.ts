@@ -17,6 +17,7 @@ export function generateManifest(
     action: {
       default_popup: 'popup.html',
     },
+    permissions: ['storage'],
     content_scripts: [
       {
         js: entries.content,
