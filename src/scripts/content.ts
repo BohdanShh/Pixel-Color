@@ -1,14 +1,26 @@
-// import html2canvas from 'html2canvas';
+chrome.runtime.onMessage.addListener(request => {
+  if (request.message === 'start') {
+    setTimeout(start, 500);
+  }
+});
 
-// import { rgbToHex } from '../utils/rgbToHex';
+async function start() {
+  if (!('EyeDropper' in window)) {
+    alert('Your browser does not support EyeDropper API');
 
-// html2canvas(document.body).then(canvas => {
-//   const ctx = canvas.getContext('2d');
-//   ctx.imageSmoothingEnabled = false;
+    return;
+  }
 
-//   document.body.addEventListener('click', event => {
-//     const [r, g, b] = ctx.getImageData(event.clientX, event.clientY, 1, 1).data;
+  const dropper = new EyeDropper();
+  const colorFromPage = (await dropper.open()).sRGBHex;
 
-//     rgbToHex(r, g, b);
-//   });
-// });
+  chrome.storage.sync.get('recentColors', data => {
+    const recentColors = data.recentColors || [];
+    recentColors.push(colorFromPage);
+
+    chrome.storage.sync.set({
+      color: colorFromPage,
+      recentColors,
+    });
+  });
+}

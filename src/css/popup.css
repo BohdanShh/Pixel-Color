@@ -1,5 +1,9 @@
 /* Reset styles */
 
+:root {
+  --main-border-radius: 5px;
+}
+
 *,
 *::before,
 *::after {
@@ -22,7 +26,7 @@ button {
 
 canvas {
   border: 1px solid #777;
-  border-radius: 5px;
+  border-radius: var(--main-border-radius);
 }
 
 .wrapper {
@@ -57,7 +61,7 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 5px;
+  border-radius: var(--main-border-radius);
   background-color: #2bb673;
 }
 
@@ -173,13 +177,32 @@ canvas {
   flex-wrap: wrap;
 }
 
-.color-box {
+.recent-color-btn {
+  position: relative;
   width: 20px;
   height: 20px;
-  border-radius: 5px;
-  background-color: #5f9ea0;
+  border-radius: var(--main-border-radius);
 }
 
-#color-preview {
-  background-color: #000;
+.recent-color-tooltip {
+  position: absolute;
+  top: 130%;
+  left: 50%;
+  padding: 5px;
+  border-radius: var(--main-border-radius);
+  font-size: 12px;
+  color: #fff;
+  background-color: #777;
+  transform: translateX(-50%);
+}
+
+.recent-color-tooltip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background-color: #777;
+  transform: translate(-50%, -50%) rotate(45deg);
 }

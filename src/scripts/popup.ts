@@ -1,7 +1,8 @@
-import { ChromeStorageService } from 'src/services/ChromeStorageService';
 import { getCanvasPixelColor } from 'src/utils/getCanvasPixelColor';
 import { hexToRgb } from 'src/utils/hexToRgb';
 import { rgbToHex } from 'src/utils/rgbToHex';
+
+const RGB_REGEX = /RGB\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/i;
 
 const colorPickerState = {
   x: 296,
@@ -18,6 +19,7 @@ const colorValue = document.querySelector<HTMLDivElement>('.color-value');
 const copyValueBtn = document.querySelector<HTMLButtonElement>('#copy-value-btn');
 const colorSlider = document.querySelector<HTMLDivElement>('#color-slider');
 const hueSlider = document.querySelector<HTMLDivElement>('#hue-slider');
+const recentColorsContainer = document.querySelector<HTMLDivElement>('.recent-colors');
 
 const colorPicker = document.querySelector<HTMLCanvasElement>('#color-picker');
 const colorPickerCtx = colorPicker.getContext('2d');
@@ -49,14 +51,15 @@ hueBarCtx.fill();
 // Main functions
 
 function init() {
-  ChromeStorageService.get(
-    ['color', 'colorSliderPosition', 'hueSliderPosition', 'colorPickerRgbColor'],
+  chrome.storage.sync.get(
+    ['color', 'colorSliderPosition', 'hueSliderPosition', 'colorPickerRgbColor', 'recentColors'],
     data => {
       const {
         color = '#d81616',
         colorSliderPosition = { x: colorPickerState.x, y: colorPickerState.y },
         hueSliderPosition,
         colorPickerRgbColor = colorPickerState.rgbColor,
+        recentColors = [],
       } = data;
 
       updateBadge({ color });
@@ -72,6 +75,20 @@ function init() {
       hueSlider.style.top = `${hueSliderPosition?.y - hueSlider.clientHeight / 2}px`;
 
       setColorPickerGradient(colorPickerRgbColor);
+
+      recentColors.length
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          recentColors.forEach((color: any) => {
+            const recentColorElement = document.createElement('button');
+            recentColorElement.classList.add('recent-color-btn');
+            recentColorElement.style.backgroundColor = color;
+
+            recentColorsContainer.append(recentColorElement);
+          })
+        : recentColorsContainer.insertAdjacentHTML(
+            'afterbegin',
+            '<i>History is empty, try to pick some colors first</i>'
+          );
     }
   );
 }
@@ -137,7 +154,13 @@ async function updateBadge({ text = '\n', color }: { text?: string; color?: stri
 // Event handlers
 
 function pickPageColorButtonClickHandler() {
-  ChromeStorageService.clear();
+  chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+    const activeTab = tabs[0];
+
+    chrome.tabs.sendMessage(activeTab.id, { message: 'start' });
+  });
+
+  window.close();
 }
 
 function colorPickerMouseDownHandler({ offsetX, offsetY }: MouseEvent) {
@@ -175,8 +198,7 @@ function colorPickerMouseUpHandler({ offsetX, offsetY }: MouseEvent) {
 
   setColor();
 
-  ChromeStorageService.set('color', hex);
-  ChromeStorageService.set('colorSliderPosition', { x: offsetX, y: offsetY });
+  chrome.storage.sync.set({ color: hex, colorSliderPosition: { x: offsetX, y: offsetY } });
 }
 
 function hueBarClickHandler({ offsetX, offsetY }: MouseEvent) {
@@ -218,9 +240,11 @@ function hueBarMouseUpHandler({ offsetX, offsetY }: MouseEvent) {
   setColor();
   setColorPickerGradient(rgbString);
 
-  ChromeStorageService.set('color', rgbToHex(pickerR, pickerG, pickerB));
-  ChromeStorageService.set('hueSliderPosition', { y: offsetY });
-  ChromeStorageService.set('colorPickerRgbColor', rgbString);
+  chrome.storage.sync.set({
+    color: rgbToHex(pickerR, pickerG, pickerB),
+    hueSliderPosition: { y: offsetY },
+    colorPickerRgbColor: rgbString,
+  });
 }
 
 function colorTypeSelectValueChangeHandler(event: Event) {
@@ -228,8 +252,7 @@ function colorTypeSelectValueChangeHandler(event: Event) {
   colorPickerState.colorType = value;
 
   if (value === 'hex') {
-    const rgbRegex = /RGB\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
-    const [, r, g, b] = colorValue.textContent.match(rgbRegex);
+    const [, r, g, b] = colorValue.textContent.match(RGB_REGEX);
 
     colorValue.textContent = rgbToHex(Number(r), Number(g), Number(b));
 
@@ -245,6 +268,42 @@ function copyValueButtonClickHandler() {
   navigator.clipboard.writeText(colorValue.textContent);
 
   displayCopySuccessTooltip(colorValueWrapper, 'Copied!', 2500);
+}
+
+function recentColorContainerClickHandler(event: MouseEvent) {
+  const target = event.target as HTMLElement;
+
+  if (target.tagName === 'BUTTON') {
+    const [, r, g, b] = target.style.backgroundColor.match(RGB_REGEX);
+
+    const hex = rgbToHex(Number(r), Number(g), Number(b));
+
+    colorValue.textContent = colorPickerState.colorType === 'hex' ? hex : `RGB(${r}, ${g}, ${b})`;
+
+    updateBadge({ color: hex });
+
+    chrome.storage.sync.set({ color: hex });
+  }
+}
+
+function recentColorContainerMouseOverHandler(event: MouseEvent) {
+  const target = event.target as HTMLElement;
+
+  if (target.tagName === 'BUTTON') {
+    const [, r, g, b] = target.style.backgroundColor.match(RGB_REGEX);
+
+    const hex = rgbToHex(Number(r), Number(g), Number(b));
+
+    const recentColorTooltip = document.createElement('div');
+    recentColorTooltip.classList.add('recent-color-tooltip');
+    recentColorTooltip.textContent = hex;
+
+    target.append(recentColorTooltip);
+
+    target.addEventListener('mouseout', () => {
+      target.removeChild(recentColorTooltip);
+    });
+  }
 }
 
 // Events
@@ -264,3 +323,6 @@ hueBar.addEventListener('mouseup', hueBarMouseUpHandler);
 colorTypeSelect.addEventListener('change', colorTypeSelectValueChangeHandler);
 
 copyValueBtn.addEventListener('click', copyValueButtonClickHandler);
+
+recentColorsContainer.addEventListener('click', recentColorContainerClickHandler);
+recentColorsContainer.addEventListener('mouseover', recentColorContainerMouseOverHandler);
