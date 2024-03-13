@@ -24,7 +24,7 @@
         </div>
         <button id="pick-color-btn">
           <img
-            src="images//pipette.png"
+            src="images/pipette.png"
             alt="Pipette"
             width="15"
             height="15"
@@ -35,7 +35,7 @@
         <div>
           <h3>Selected color</h3>
           <div class="color-picker-wrapper">
-            <div>
+            <div class="color-picker-container">
               <canvas
                 id="color-picker"
                 width="325"
@@ -44,7 +44,7 @@
               </canvas>
               <div id="color-slider"></div>
             </div>
-            <div>
+            <div class="hue-container">
               <canvas
                 id="color-hue-bar"
                 width="30"
@@ -71,8 +71,30 @@
           </div>
         </div>
         <div class="recent">
-          <h3>Recent</h3>
+          <div>
+            <h3>Recent</h3>
+            <button id="open-modal-btn">
+              <img
+                src="images/trash.png"
+                alt="Trash"
+                width="15"
+                height="15"
+              />
+            </button>
+          </div>
           <div class="recent-colors"></div>
+        </div>
+      </div>
+    </div>
+    <div class="backdrop">
+      <div id="modal">
+        <h4 class="modal-title">Clear History?</h4>
+        <p class="modal-description">
+          This action is irreversible, and all previous color selections will be lost.
+        </p>
+        <div>
+          <button id="close-modal-btn">Cancel</button>
+          <button id="clear-history-btn">Clear</button>
         </div>
       </div>
     </div>

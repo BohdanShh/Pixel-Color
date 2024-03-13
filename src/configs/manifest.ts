@@ -21,6 +21,7 @@ export function generateManifest(
     content_scripts: [
       {
         js: entries.content,
+        css: ['css/content.css'],
         matches: ['<all_urls>'],
         all_frames: true,
       },

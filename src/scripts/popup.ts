@@ -1,3 +1,4 @@
+import { createElement } from 'src/utils/createElement';
 import { getCanvasPixelColor } from 'src/utils/getCanvasPixelColor';
 import { hexToRgb } from 'src/utils/hexToRgb';
 import { rgbToHex } from 'src/utils/rgbToHex';
@@ -20,14 +21,18 @@ const copyValueBtn = document.querySelector<HTMLButtonElement>('#copy-value-btn'
 const colorSlider = document.querySelector<HTMLDivElement>('#color-slider');
 const hueSlider = document.querySelector<HTMLDivElement>('#hue-slider');
 const recentColorsContainer = document.querySelector<HTMLDivElement>('.recent-colors');
+const openModalBtn = document.querySelector<HTMLButtonElement>('#open-modal-btn');
+const modalBackdrop = document.querySelector<HTMLDivElement>('.backdrop');
+const closeModalBtn = document.querySelector<HTMLButtonElement>('#close-modal-btn');
+const clearHistoryBtn = document.querySelector<HTMLButtonElement>('#clear-history-btn');
 
 const colorPicker = document.querySelector<HTMLCanvasElement>('#color-picker');
-const colorPickerCtx = colorPicker.getContext('2d');
+const colorPickerCtx = colorPicker.getContext('2d', { willReadFrequently: true });
 const colorPickerWidth = colorPicker.width;
 const colorPickerHeight = colorPicker.height;
 
 const hueBar = document.querySelector<HTMLCanvasElement>('#color-hue-bar');
-const hueBarCtx = hueBar.getContext('2d');
+const hueBarCtx = hueBar.getContext('2d', { willReadFrequently: true });
 const hueBarWidth = hueBar.width;
 const hueBarHeight = hueBar.height;
 
@@ -79,9 +84,10 @@ function init() {
       recentColors.length
         ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
           recentColors.forEach((color: any) => {
-            const recentColorElement = document.createElement('button');
-            recentColorElement.classList.add('recent-color-btn');
-            recentColorElement.style.backgroundColor = color;
+            const recentColorElement = createElement('button', {
+              classList: ['recent-color-btn'],
+              attributes: { style: `background-color: ${color}` },
+            });
 
             recentColorsContainer.append(recentColorElement);
           })
@@ -123,9 +129,7 @@ function setColor() {
 }
 
 function displayCopySuccessTooltip(element: HTMLElement, text: string, timeToLive: number) {
-  const tooltip = document.createElement('div');
-  tooltip.classList.add('copy-tooltip');
-  tooltip.textContent = text;
+  const tooltip = createElement('div', { classList: ['copy-tooltip'], textContent: text });
 
   element.appendChild(tooltip);
 
@@ -294,16 +298,53 @@ function recentColorContainerMouseOverHandler(event: MouseEvent) {
 
     const hex = rgbToHex(Number(r), Number(g), Number(b));
 
-    const recentColorTooltip = document.createElement('div');
-    recentColorTooltip.classList.add('recent-color-tooltip');
-    recentColorTooltip.textContent = hex;
+    const recentColorTooltip = createElement('div', {
+      classList: ['recent-color-tooltip'],
+      textContent: hex,
+    });
 
     target.append(recentColorTooltip);
 
     target.addEventListener('mouseout', () => {
-      target.removeChild(recentColorTooltip);
+      if (recentColorTooltip.parentNode) {
+        recentColorTooltip.parentNode.removeChild(recentColorTooltip);
+      }
     });
   }
+}
+
+function openModalBtnMouseOverHandler() {
+  const clearColorHistoryTooltip = createElement('div', {
+    classList: ['recent-color-tooltip'],
+    textContent: 'Clear',
+  });
+
+  openModalBtn.append(clearColorHistoryTooltip);
+}
+
+function openModalBtnClickHandler() {
+  modalBackdrop.style.display = 'block';
+}
+
+function openModalBtnMouseOutHandler() {
+  openModalBtn.removeChild(openModalBtn.lastChild);
+}
+
+function closeModalBtnClickHandler() {
+  modalBackdrop.style.display = 'none';
+}
+
+function clearHistoryBtnClickHandler() {
+  recentColorsContainer.innerHTML = '';
+
+  recentColorsContainer.insertAdjacentHTML(
+    'afterbegin',
+    '<i>History is empty, try to pick some colors first</i>'
+  );
+
+  modalBackdrop.style.display = 'none';
+
+  chrome.storage.sync.set({ recentColors: [] });
 }
 
 // Events
@@ -326,3 +367,11 @@ copyValueBtn.addEventListener('click', copyValueButtonClickHandler);
 
 recentColorsContainer.addEventListener('click', recentColorContainerClickHandler);
 recentColorsContainer.addEventListener('mouseover', recentColorContainerMouseOverHandler);
+
+openModalBtn.addEventListener('mouseover', openModalBtnMouseOverHandler);
+openModalBtn.addEventListener('click', openModalBtnClickHandler);
+openModalBtn.addEventListener('mouseout', openModalBtnMouseOutHandler);
+
+closeModalBtn.addEventListener('click', closeModalBtnClickHandler);
+
+clearHistoryBtn.addEventListener('click', clearHistoryBtnClickHandler);

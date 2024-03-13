@@ -64,7 +64,7 @@ export default (env: EnvVariables) => {
             to: path.resolve(__dirname, 'dist', 'images'),
           },
           {
-            from: path.resolve(__dirname, 'src', 'css', 'popup.css'),
+            from: path.resolve(__dirname, 'src', 'css'),
             to: path.resolve(__dirname, 'dist', 'css'),
           },
         ],
